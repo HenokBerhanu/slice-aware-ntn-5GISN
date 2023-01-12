@@ -61,7 +61,7 @@ The program `nt.py` first generate all nessesary environment of the simulation b
 
 As we can see in Figure3, the object Classifier is responsible for connecting RAN, NTN, and CN through interface N2 and N3. However, since N2 interfect between the Classifer and AMF is logical connection, the code should only implement N3.
 
-![截屏2023-01-12 下午2.13.56](/Users/zbh/Library/Application Support/typora-user-images/截屏2023-01-12 下午2.13.56.png)
+![fig3](figure3.png)
 
 
 
