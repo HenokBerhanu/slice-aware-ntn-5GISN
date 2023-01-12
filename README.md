@@ -18,7 +18,7 @@ Lastly, we evaluate the performances of our method using the aforementioned test
 </div>
 
 # Table of contents
-
+- [Exploration](#Exploration)
 - [Requirements](#requirements)
   - [Hardware](#hardware)
   - [Software](#software)
@@ -48,6 +48,13 @@ Lastly, we evaluate the performances of our method using the aforementioned test
 - [Authors](#authors)
 - [Acknownledgments](#acknownledgments)
 - [License](#license)
+## Exploration
+### Q1 Switching Non-slice-aware
+1
+### Q2 Client Server Communication
+1
+### Q3 Stitching of RAN, NTN, CN
+1
 
 ## Requirements
 
