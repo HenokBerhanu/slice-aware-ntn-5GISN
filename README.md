@@ -54,7 +54,153 @@ Lastly, we evaluate the performances of our method using the aforementioned test
 ### Q2 Client Server Communication
 1
 ### Q3 Stitching of RAN, NTN, CN
-1
+
+For the stitching of UERAN, NTN, and CN
+
+The program `nt.py` first generate all nessesary environment of the simulation by `testbed.generate()`. It further calls `code/source/scenario/slice_aware_ntn.py::generate_topology()`, which is to build the topology in Figure3.
+
+As we can see in Figure3, the object Classifier is responsible for connecting RAN, NTN, and CN through interface N2 and N3. However, since N2 interfect between the Classifer and AMF is logical connection, the code should only implement N3.
+
+![截屏2023-01-12 下午2.13.56](/Users/zbh/Library/Application Support/typora-user-images/截屏2023-01-12 下午2.13.56.png)
+
+
+
+In function `generate_topology()`, nessesary **non-configured** components object (AMF, QOF, GnB) are created by calling`*.new_service()` and are assigned different IP address by calling `*.attach_network("sbi", self.networker.get_address("sbi"))`.  (For Network object clarification, `sbi` network can be subnet `IPv4Network('172.16.1.0/24')`. And first time calling `self.networker.get_address("sbi")` returns `IPv4Network('172.16.1.2')`, second time returns `IPv4Network('172.16.1.3')`.)
+
+We have two Classifier object whose names are `classifier-ran` and `classifier-cn`, which is defined at `slice_aware_ntn.py::L263`. From L264 to L281, it defines that attached subnetwork for two classifiers. Below lists which subnet is attached to which object to make stitch happen.
+
+```bash
+classifier-ran
+- satellite-control
+- "classifier-ran" # for connecting GnB
+- "st-classifier-0" # for connecting LEO NTN 
+- "st-classifier-1" # for connecting GEO NTN 
+
+classifier-cn
+- satellite-control
+- sbi
+- "classifier-cn-dp-0" # for connecting UDF slice-0
+- "classifier-cn-dp-1" # for connecting UDF slice-1
+- "classifier-cn-dp-2" # for connecting UDF slice-2
+- "gw-classifier-0" # for connecting LEO NTN
+- "gw-classifier-1" # for connecting GEO NTN
+
+GnB
+- "classifier-ran" 
+- ran-link-sim # For connecting UE
+
+UPF-0 # UPF for slice-0
+- pfcp
+- "classifier-cn-dp-0"
+- data-network-slice-0
+- ue-network-slice-0
+
+UPF-1 # UPF for slice-1
+- pfcp
+- "classifier-cn-dp-1"
+- data-network-slice-1
+- ue-network-slice-1
+
+UPF-2 # UPF for slice-2
+- pfcp
+- "classifier-cn-dp-2"
+- data-network-slice-2
+- ue-network-slice-2
+
+trunks-0 # LEO NTN link
+- "st-classifier-0"
+- "gw-classifier-0"
+
+trunks-1 # GEO NTN link
+- "st-classifier-1"
+- "gw-classifier-1"
+```
+
+After the network topology is built, below codes will write these info into yaml file to `code/config/services` for later usage.
+
+```bash
+# in code/source/testbed/testbed.py
+self.scenario.configure_services()
+self.scenario.write_configuration()
+```
+
+The following line `self.scenario.configure_compose()` will create the composed Service object `CService` containing all nessesary information. 
+
+In the next line `self.scenario.configure_entrypoint()`, each component (will later be container) will call its function `configure_entrypoint()` (located in `code/source/model/slice_aware_ntn.py`). This will build the ingress and egress route as a format of sequence of `ip` commands.  
+
+Then the following lines will first write the above `ip` commands into bash scripts (one is `classifier-cn.sh`). These bash scripts are used as the entry point of docker when composing. And then all the compose information is written into `docker-compose.yaml`.
+
+```bash
+# in code/source/testbed/testbed.py
+self.scenario.write_entrypoint() # -> code/testbeds/saw-ntn/container 
+self.scenario.write_compose()  # -> code/testbeds/saw-ntn/docker-compose.yaml
+```
+
+A sample file (`classifier-cn.sh`) is listed here:
+
+```bash
+#!/bin/bash
+echo 10 link_0 >> /etc/iproute2/rt_tables
+ip rule add from 172.16.1.2 lookup link_0
+ip rule add from 172.16.4.2 lookup link_0
+ip route add default via 172.16.12.3 table link_0
+echo 20 link_1 >> /etc/iproute2/rt_tables
+ip rule add from 172.16.0.10 lookup link_1
+ip rule add from 172.16.7.2 lookup link_1
+ip route add default via 172.16.14.3 table link_1
+ETH=$(ip a | grep 172.16.1.3 | awk '{print ($7)}')
+iptables -t mangle -A POSTROUTING -o $ETH -p udp --dport 2152 --sport 2152 -m dscp --dscp 0x2e -j DSCP --set-dscp 0x2c
+iptables -t mangle -A POSTROUTING -o $ETH -p udp --dport 2152 --sport 2152 -m dscp --dscp 0xa -j DSCP --set-dscp 0xa
+iptables -t mangle -A POSTROUTING -o $ETH -p udp --dport 2152 --sport 2152 -m dscp --dscp 0xc -j DSCP --set-dscp 0xc
+ETH=$(ip a | grep 172.16.4.3 | awk '{print ($7)}')
+iptables -t mangle -A POSTROUTING -o $ETH -p udp --dport 2152 --sport 2152 -m dscp --dscp 0x2e -j DSCP --set-dscp 0x2c
+iptables -t mangle -A POSTROUTING -o $ETH -p udp --dport 2152 --sport 2152 -m dscp --dscp 0xa -j DSCP --set-dscp 0xa
+iptables -t mangle -A POSTROUTING -o $ETH -p udp --dport 2152 --sport 2152 -m dscp --dscp 0xc -j DSCP --set-dscp 0xc
+ETH=$(ip a | grep 172.16.7.3 | awk '{print ($7)}')
+iptables -t mangle -A POSTROUTING -o $ETH -p udp --dport 2152 --sport 2152 -m dscp --dscp 0x2e -j DSCP --set-dscp 0x2c
+iptables -t mangle -A POSTROUTING -o $ETH -p udp --dport 2152 --sport 2152 -m dscp --dscp 0xa -j DSCP --set-dscp 0xa
+iptables -t mangle -A POSTROUTING -o $ETH -p udp --dport 2152 --sport 2152 -m dscp --dscp 0xc -j DSCP --set-dscp 0xc
+ETH=$(ip a | grep 172.16.0.13 | awk '{print ($7)}')
+iptables -t mangle -A POSTROUTING -o $ETH -p udp --dport 2152 --sport 2152 -m dscp --dscp 0x2e -j DSCP --set-dscp 0x2c
+iptables -t mangle -A POSTROUTING -o $ETH -p udp --dport 2152 --sport 2152 -m dscp --dscp 0xa -j DSCP --set-dscp 0xa
+iptables -t mangle -A POSTROUTING -o $ETH -p udp --dport 2152 --sport 2152 -m dscp --dscp 0xc -j DSCP --set-dscp 0xc
+ETH=$(ip a | grep 172.16.12.2 | awk '{print ($7)}')
+iptables -t mangle -A POSTROUTING -o $ETH -p udp --dport 2152 --sport 2152 -m dscp --dscp 0x2c -j DSCP --set-dscp 0x2e
+iptables -t mangle -A POSTROUTING -o $ETH -p udp --dport 2152 --sport 2152 -m dscp --dscp 0xa -j DSCP --set-dscp 0xa
+iptables -t mangle -A POSTROUTING -o $ETH -p udp --dport 2152 --sport 2152 -m dscp --dscp 0xc -j DSCP --set-dscp 0xc
+ETH=$(ip a | grep 172.16.14.2 | awk '{print ($7)}')
+iptables -t mangle -A POSTROUTING -o $ETH -p udp --dport 2152 --sport 2152 -m dscp --dscp 0x2c -j DSCP --set-dscp 0x2e
+iptables -t mangle -A POSTROUTING -o $ETH -p udp --dport 2152 --sport 2152 -m dscp --dscp 0xa -j DSCP --set-dscp 0xa
+iptables -t mangle -A POSTROUTING -o $ETH -p udp --dport 2152 --sport 2152 -m dscp --dscp 0xc -j DSCP --set-dscp 0xc
+ETH=$(ip a | grep 172.16.1.3 | awk '{print($7)}')
+ip link add ifb0 type ifb
+ip link set dev ifb0 up
+tc qdisc add dev ifb0 root sfq perturb 10
+tc qdisc add dev $ETH handle ffff: ingress
+tc filter add dev $ETH parent ffff: u32 match u32 0 0 action mirred egress redirect dev ifb0
+ETH=$(ip a | grep 172.16.4.3 | awk '{print($7)}')
+ip link add ifb1 type ifb
+ip link set dev ifb1 up
+tc qdisc add dev ifb1 root sfq perturb 10
+tc qdisc add dev $ETH handle ffff: ingress
+tc filter add dev $ETH parent ffff: u32 match u32 0 0 action mirred egress redirect dev ifb1
+ETH=$(ip a | grep 172.16.7.3 | awk '{print($7)}')
+ip link add ifb2 type ifb
+ip link set dev ifb2 up
+tc qdisc add dev ifb2 root sfq perturb 10
+tc qdisc add dev $ETH handle ffff: ingress
+tc filter add dev $ETH parent ffff: u32 match u32 0 0 action mirred egress redirect dev ifb2
+ETH=$(ip a | grep 172.16.0.13 | awk '{print($7)}')
+ip link add ifb3 type ifb
+ip link set dev ifb3 up
+tc qdisc add dev ifb3 root sfq perturb 10
+tc qdisc add dev $ETH handle ffff: ingress
+tc filter add dev $ETH parent ffff: u32 match u32 0 0 action mirred egress redirect dev ifb3
+classifier-runtime --config classifier.yaml
+```
+
+Finally, `code/source/scenario/slice_aware_ntn.py::run()::start_testbed()` will create container for us by calling `cmd = f"docker compose -f {path} up -d"`. `path` here refers to `code/testbeds/saw-ntn/docker-compose.yaml`.
+
 
 ## Requirements
 
