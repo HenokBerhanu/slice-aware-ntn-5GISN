@@ -50,9 +50,39 @@ Lastly, we evaluate the performances of our method using the aforementioned test
 - [License](#license)
 ## Exploration
 ### Q1 Switching Non-slice-aware
-1
+In "code/source/model/non_slice_aware_ntn.py", 
+```python
+class NTNQOF(Service):  
+  def configure():   
+    ...   
+    self.configuration['configuration']['slice_aware'] = False   
+    ...
+```
+This is the part to make non-slice_aware scenario. NTNQOF is a container, which contains the deeper logic of how to make it non-slice-aware. (I guess the logic might be just make NTNQOF stop separating QoS flow.)
 ### Q2 Client Server Communication
-1
+For the client server communication. 
+
+The program nt.py first generate all nessesary environment of the simulation by `testbed.generate()`, which includes the `iperf` command line of client-server communication. 
+
+From `code/source/testbed/testbed.py::generate()`, there are two lines of code for preparing the iperf command. 
+
+The first line `self.scenario.configure_entrypoint()` calls the function `generate_server()` and `generate_client()` from the `Application` object `Web/VoIP/Streaming`. These functions simply return the actual `iperf` command string. 
+
+The second line `self.scenario.write_entrypoint()` writes these command into bash script and saved into the file `code/testbeds/saw-ntn/container` 
+
+The program `nt.py` then runs the testbed through the line `testbed.run(args.iterations, args.pcap)`. In this function, it calls `code/source/scenario/slice_aware_ntn.py::run()`, which is the main body of execution.
+
+In `code/source/scenario/slice_aware_ntn.py::run()`, function `generate_traffic()` is to let UE execute the bash script mentioned above to create traffic. (Client-Server Communication through `iperf`). 
+
+One example file among these bash scripts is `app-server-ue-0-streaming-slice-1.sh`
+
+```bash
+#!/bin/bash
+iperf -s -B 172.16.6.3 -p 8085 -u -l 1400 -i 1 -f b --tos 0x30 > results/app-server-ue-0-streaming-slice-1_streaming_1_probes.txt
+```
+
+As you can see the iperf results are the traffic data, which is saved in `code/testbeds/saw-ntn/results`
+
 ### Q3 Stitching of RAN, NTN, CN
 
 For the stitching of UERAN, NTN, and CN
