@@ -51,7 +51,7 @@ Lastly, we evaluate the performances of our method using the aforementioned test
 - [License](#license)
 ## Exploration-Questions-for-Slice-Aware-NTN
 ### Q1 Switching Non-slice-aware
-In "code/source/model/non_slice_aware_ntn.py", 
+In `code/source/model/non_slice_aware_ntn.py`, 
 ```python
 class NTNQOF(Service):  
   def configure():   
