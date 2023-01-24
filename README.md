@@ -236,6 +236,10 @@ Finally, `code/source/scenario/slice_aware_ntn.py::run()::start_testbed()` will 
 
 ## Exploration-Execution-flow-of-Containers
 
+The following discussion is for contrainer. So you need these:
+- Slice Classifier for classifiers https://github.com/shynuu/slice-classifier
+- Free5GC for 5G CN https://github.com/free5gc/free5gc
+
 ### 1. Execution flow - QOF Server Start
 
 1. `NFs/qof/service/init.go::Initialize()` will let `factory` package to translate `.yaml` file to an object `QofConfig`.
