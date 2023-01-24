@@ -368,8 +368,9 @@ The following discussion is for contrainer. So you need these:
 
 ## 4. Execution flow - Where QoS table comes from?
 
-1. QoF will gather all information by calling `code/source/model/slice_aware_ntn.py::QOF::configure()`. It will read `5QI-5DSCP` from Application Class.
-2. NtN will gather all information by calling `code/source/model/slice_aware_ntn.py::NtNQoF::configure()`. It will read `5DSCP-SatDSCP` from Application Class.
+1. `.ymal` file is generated during the runtime by `code/source/testbed/testbed.py::Testbed::generated()::self.scenario.configure_services()`
+2. QoF will gather all information by calling `code/source/model/slice_aware_ntn.py::QOF::configure()`. It will read `5QI-5DSCP` from Application Class.
+3. NtN will gather all information by calling `code/source/model/slice_aware_ntn.py::NtNQoF::configure()`. It will read `5DSCP-SatDSCP` from Application Class.
 
 
 
