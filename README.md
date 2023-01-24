@@ -18,7 +18,8 @@ Lastly, we evaluate the performances of our method using the aforementioned test
 </div>
 
 # Table of contents
-- [Exploration](#Exploration)
+- [Exploration Questions for Slice-Aware-NTN](#Exploration-Questions-for-Slice-Aware-NTN)
+- [Exploration Execution flow of Containers](#Exploration-Execution-flow-of-Containers)
 - [Requirements](#requirements)
   - [Hardware](#hardware)
   - [Software](#software)
@@ -48,7 +49,7 @@ Lastly, we evaluate the performances of our method using the aforementioned test
 - [Authors](#authors)
 - [Acknownledgments](#acknownledgments)
 - [License](#license)
-## Exploration
+## Exploration-Questions-for-Slice-Aware-NTN
 ### Q1 Switching Non-slice-aware
 In "code/source/model/non_slice_aware_ntn.py", 
 ```python
@@ -98,6 +99,8 @@ As we can see in Figure3, the object Classifier is responsible for connecting RA
 In function `generate_topology()`, nessesary **non-configured** components object (AMF, QOF, GnB) are created by calling`*.new_service()` and are assigned different IP address by calling `*.attach_network("sbi", self.networker.get_address("sbi"))`.  (For Network object clarification, `sbi` network can be subnet `IPv4Network('172.16.1.0/24')`. And first time calling `self.networker.get_address("sbi")` returns `IPv4Network('172.16.1.2')`, second time returns `IPv4Network('172.16.1.3')`.)
 
 We have two Classifier object whose names are `classifier-ran` and `classifier-cn`, which is defined at `slice_aware_ntn.py::L263`. From L264 to L281, it defines that attached subnetwork for two classifiers. Below lists which subnet is attached to which object to make stitch happen.
+
+### 
 
 ```bash
 classifier-ran
@@ -230,6 +233,8 @@ classifier-runtime --config classifier.yaml
 ```
 
 Finally, `code/source/scenario/slice_aware_ntn.py::run()::start_testbed()` will create container for us by calling `cmd = f"docker compose -f {path} up -d"`. `path` here refers to `code/testbeds/saw-ntn/docker-compose.yaml`.
+
+## Exploration-Execution-flow-of-Containers
 
 
 ## Requirements
