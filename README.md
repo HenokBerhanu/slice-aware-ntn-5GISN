@@ -236,6 +236,138 @@ Finally, `code/source/scenario/slice_aware_ntn.py::run()::start_testbed()` will 
 
 ## Exploration-Execution-flow-of-Containers
 
+### 1. Execution flow - QOF Server Start
+
+1. `NFs/qof/service/init.go::Initialize()` will let `factory` package to translate `.yaml` file to an object `QofConfig`.
+2. `NFs/qof/service/init.go::Start()` will first process `QofConfig` to `QOFContext` by `context` package, which will be used by `HandleSessionCreateQof`. 
+3. Then it will build connections to other NF, such as registering in NRF.
+4. `producer.AddService(router)` will start the server in the local host. It will add its HTTP RESTful API. (where `router` is type `gin.Engine`). The API function is kept in `handler.go`
+5. Whenever the API is called by SMF, it will trigger `HandleSessionCreateQof()` and further trigger functions in `consumer`, which will be calling the API of NTNQoF. 
+
+### 2. Execution flow - Slice Aware Setup:
+
+1. QoF calls `NFs/qof/context/context.go::InitDefaultSlice()` and passes the `ControlPlane` information to NtNQoF by calling it's RESTful API `/ntn-session/admission-control`. And NtNQoF will pass the slice-aware information 
+
+   ```go
+   type ControlPlane struct {
+   	RAN string `yaml:"ran" json:"ran"`
+   	CN  string `yaml:"cn" json:"cn"`
+   	ID  uint8  `yaml:"id" json:"id"`
+   } 
+   ```
+
+2. NtNQoF will pass the `ADM` information to `Classifier` by calling it's RESTful API `/control-plane/adm`
+
+   ```go
+   type ADM struct {
+   	Controls []ADMControl `json:"controls" yaml:"controls" bson:"controls"`
+   	Aware    bool         `json:"slice_aware" yaml:"slice_aware" bson:"slice_aware"`
+   }
+   
+   type ADMControl struct {
+   	SliceID    uint8  `json:"slice_id" yaml:"slice_id" bson:"slice_id"` provided by NtNQoF
+   	Throughput int    `json:"throughput" yaml:"throughput" bson:"throughput"`
+   	Endpoint   string `json:"endpoint" yaml:"endpoint" bson:"endpoint"`
+   }
+   ```
+
+3. Classifer's `runtime/runtime.go::AdmissionControl()` will accepts the passed `ADM`. Based on `ADM.Controls`, `runtime/runtime.go::buildTree()` will limit the throughput for each slice by using command `tc`.
+
+### 3. Execution flow - PDU Setup:
+
+1. SMF calls `NFs/smf/consumer/nsmf_qof.go::SendSessionQOF(QOFSessionInfo)` to pass sesson information to QoF. From here, the RESTful API `/qof-session/new-session` provided by QoF is called.
+   ```go
+   type QOFSessionInfo struct {
+   	SessionID int32 `json:"sessionid" yaml:"sessionid" bson:"sessionid"`
+   	'Snssai'    *models.Snssai
+   	Supi      string `json:"supi" yaml:"supi" bson:"supi"`
+   	UTEID     uint32 `json:"uteid" yaml:"supi" bson:"supi"`
+   	DTEID     uint32 `json:"dteid" yaml:"supi" bson:"supi"`
+   	IPv4      string `json:"ipv4" yaml:"ipv4" bson:"ipv4"`
+   	'Var5QI'    int32  `json:"var5qi" yaml:"var5qi" bson:"var5qi"`
+   }
+   
+   type Snssai struct {
+   	Sst int32  `json:"sst" yaml:"sst" bson:"sst" mapstructure:"Sst"`
+   	Sd  string `json:"sd,omitempty" yaml:"sd" bson:"sd" mapstructure:"Sd"`
+   }
+   ```
+
+   
+
+2. QoF's RESTful API then trigger the function `NFs/qof/producer/handler.go::HandleSessionCreateQof()`. The function  does three things
+
+   * Map `QOFSessionInfo.Snssai` to exact UPF, RAN, Slice ID by function `TranslateSnssai()`
+   * Map `QOFSessionInfo.Var5QI` to `5G_DSCP`(Differentiated Services Code Point) -> I think this value is related to `dnn` in `free5gc/config/smfcfg.yaml`.
+   * Merge the above results along with `QOFSessionInfo` to `NTNSession` and send it to NtNQoF by calling it's RESTful API `/ntn-session/new-session`. 
+
+   ```go
+   // g_i (SliceID): The information identifying the i-th slice in the 5G domain
+   // q_l (QosMatch): The QFI identifying each 5QI
+   type NTNSession struct {
+   	RAN        string      `json:"ran" yaml:"ran" bson:"ran"`
+   	UPF        string      `json:"upf" yaml:"upf" bson:"upf"`
+   	SliceMatch *SliceMatch `json:"slice_match" yaml:"slice_match" bson:"slice_match"`
+   	'QosMatch'   *QosMatch   `json:"qos_match" yaml:"qos_match" bson:"qos_match"`
+   	'SliceID'    string      `json:"id" yaml:"id" bson:"id"`
+   	IPv4       string      `json:"ipv4" yaml:"ipv4" bson:"ipv4"`
+   }
+   
+   type QosMatch struct {
+   	DSCP uint8 `json:"dscp" yaml:"dscp" bson:"dscp"`
+   }
+   
+   type SliceMatch struct {
+   	UTEID uint32 `json:"uteid" yaml:"uteid" bson:"uteid"`
+   	DTEID uint32 `json:"dteid" yaml:"uteid" bson:"uteid"`
+   }
+   ```
+
+3. NTNQoF's RESTful API then trigger the function `NFs/ntnqof/producer/handler.go::HandleSessionCreateQof()`. This function does three things:
+
+   * `TranslateQoS()` takes `5G_DSCP` and translate it to `Sat_DSCP` 
+   * `MapSlice()` takes the `SliceID` and  identify the corresponding NTN-Slice
+   * Calls the following functions. During the runtime, `Pipe()` will call the RESTful API of Classifier `/data-plane/pdu` and pass the formulated `PDU` to the Classifier. Corresponding info is also listed.
+
+   ```go
+   // The information identifying the slice in the satellite domain
+   // t (sliceSatellite.SliceID) : The information identifying the i-th slice in the satellite domain
+   // c (dscpSatellite) : Each individual NTN QoS class
+   go Pipe(classifierCN, mobileSession.SliceMatch.DTEID, dscp5G, 'dscpSatellite', 'sliceSatellite.SliceID', mobileSession.UPF, sliceSatellite.ClassifierCNEndpoint, classifierCNIngress, false, &wg)
+   
+   pdu := &PDU{
+   		DSCP5:    dscp5G,
+   		DSCPS:    dscpSatellite,
+   		TEID:     mobileSession.SliceMatch.DTEID,
+   		SliceID:  sliceSatellite.SliceID,
+   		IPv4:     mobileSession.UPF,
+   		Endpoint: sliceSatellite.ClassifierCNEndpoint,
+   		Ingress:  classifierCNIngress,
+   		IsRAN:    false,
+   	}
+   
+   go Pipe(classifierRAN, mobileSession.SliceMatch.UTEID, dscp5G, dscpSatellite, sliceSatellite.SliceID, mobileSession.UPF, sliceSatellite.ClassifierRANEndpoint, classifierRANIngress, true, &wg)
+   
+   pdu := &PDU{
+   		DSCP5:    dscp5G,
+   		DSCPS:    dscpSatellite,
+   		TEID:     mobileSession.SliceMatch.UTEID,
+   		SliceID:  sliceSatellite.SliceID,
+   		IPv4:     mobileSession.UPF,
+   		Endpoint: sliceSatellite.ClassifierRANEndpoint,
+   		Ingress:  classifierRANIngress,
+   		IsRAN:    true,
+   	}
+   ```
+
+4. Classifer's `runtime/runtime.go::NewPDU()` will accepts the passed `PDU`. The function will build the traffic rule by using `iptables`.
+
+## 4. Execution flow - Where QoS table comes from?
+
+1. QoF will gather all information by calling `code/source/model/slice_aware_ntn.py::QOF::configure()`. It will read `5QI-5DSCP` from Application Class.
+2. NtN will gather all information by calling `code/source/model/slice_aware_ntn.py::NtNQoF::configure()`. It will read `5DSCP-SatDSCP` from Application Class.
+
+
 
 ## Requirements
 
