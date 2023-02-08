@@ -63,7 +63,7 @@ images:
     required:
 
   - name: "classifier"
-    fulltag: "shynuu/sa-ntn:classifier"
+    fulltag: "bzhang888/sa-ntn:classifier"
     required:
 
   - name: "application"

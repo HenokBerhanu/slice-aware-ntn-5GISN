@@ -1023,7 +1023,7 @@ class TRUNKS(Service):
 class CLASSIFIER(Service):
 
     configuration_file = "classifier.yaml"
-    docker_image = "shynuu/sa-ntn:classifier"
+    docker_image = "bzhang888/sa-ntn:classifier"
 
     def configure(self, repository: Repository) -> None:
         """Configure the CLASSIFIER service"""

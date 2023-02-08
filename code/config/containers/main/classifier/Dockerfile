@@ -1,7 +1,7 @@
 FROM golang:1.14 AS builder
 
 WORKDIR /
-RUN git clone https://github.com/shynuu/slice-classifier.git
+RUN git clone https://github.com/zbh888/slice-classifier.git
 WORKDIR /slice-classifier
 RUN go build -o classifier classifier-runtime.go
 
