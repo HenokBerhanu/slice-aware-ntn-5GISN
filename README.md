@@ -1,5 +1,7 @@
 # Slice Aware Non Terrestrial Networks
 
+NOTE THIS IS A MODIFIED VERSION
+
 This repository contains all the tools to launch a testbed and experiment our integration method of NTN as slice-aware backhaul links in 5G networks.
 
 ![satellite_transport_network](https://user-images.githubusercontent.com/41422704/121254098-2b37ba00-c8aa-11eb-91ba-537959db5d3b.png)
