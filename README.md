@@ -51,6 +51,12 @@ Lastly, we evaluate the performances of our method using the aforementioned test
 - [Authors](#authors)
 - [Acknownledgments](#acknownledgments)
 - [License](#license)
+## Integrating OpenSand
+
+1. separate trunk entry point route to terminal and gateway respectively
+2. Classifier entrypoint needs to specify terminal and gateway ip in classifier network
+3. Gateway and terminal should be included in the classifier network to achieve connection.
+
 ## Exploration-Questions-for-Slice-Aware-NTN
 ### Q1 Switching Non-slice-aware
 In `code/source/model/non_slice_aware_ntn.py`, 
