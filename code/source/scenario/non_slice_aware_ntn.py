@@ -324,8 +324,12 @@ class NonSliceAwareNTN(Scenario):
     def run(self) -> bool:
 
         def start_testbed(path: str) -> None:
+            # CN114 host IP
+            #my_env = {**os.environ, 'DISPLAY': str("10.10.0.14") + ":" + str(1)}
+            # Network Lab host IP
+            my_env = {**os.environ, 'DISPLAY': str("10.33.2.165") + ":" + str(1)}
             cmd = f"docker compose -f {path} up -d"
-            subprocess.call(cmd, shell=True)
+            subprocess.call(cmd, env=my_env, shell=True)
 
         def stop_testbed(path: str) -> None:
             cmd = f"docker compose -f {path} down -v"
