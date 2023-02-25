@@ -124,7 +124,7 @@ class Testbed(object):
         Keep the scenario folders
         """
         
-        count == 0
+        count = 0
         if os.path.exists(f"{scenario_folder}/{name}"):
             count += 1
             print("Found the scenario folders", f"{scenario_folder}/{name}")
