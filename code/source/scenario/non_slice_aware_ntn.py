@@ -345,10 +345,13 @@ class NonSliceAwareNTN(Scenario):
             (c, r) = ue.exec_run("ip a")
             result = r.decode('utf-8').split("\n")
             l = len(result)
+            print("wait for output bigger than", l)
             while not configured:
                 (c, r) = ue.exec_run("ip a")
                 result = r.decode('utf-8').split("\n")
+                print(len(result))
                 if len(result) > l:
+                    print("PDU has been estabilished")
                     configured = True
                 time.sleep(1)
 
@@ -394,6 +397,7 @@ class NonSliceAwareNTN(Scenario):
         start_testbed(compose_path)
         logging.info("Waiting for UE configuration...")
         wait_for_configuration(client, len(users))
+        print("wait for 15 seconds for all UE connection")
         time.sleep(15)
 
         ue_ips: List[List[str]] = []
