@@ -92,7 +92,8 @@ class Testbed(object):
 
         return receipes_path
 
-    def make_scenario_folders(self, name: str, scenario_folder: str) -> None:
+    
+    def make_scenario_folders2(self, name: str, scenario_folder: str) -> None:
         """
         Create the scenario folders
         """
@@ -114,6 +115,37 @@ class Testbed(object):
         logging.info(f"Creating {configurations_folder} folder")
         os.makedirs(configurations_folder)
 
+        self.results = results_folder
+
+        return results_folder, containers_folder, configurations_folder
+    
+    def make_scenario_folders(self, name: str, scenario_folder: str) -> None:
+        """
+        Keep the scenario folders
+        """
+        
+        count == 0
+        if os.path.exists(f"{scenario_folder}/{name}"):
+            count += 1
+            print("Found the scenario folders", f"{scenario_folder}/{name}")
+            
+        results_folder = f"{scenario_folder}/{name}/results"
+        containers_folder = f"{scenario_folder}/{name}/containers"
+        configurations_folder = f"{scenario_folder}/{name}/configurations"
+
+        if os.path.exists(results_folder):
+            count += 1
+            logging.info(f"Found {results_folder} folder")
+        if os.path.exists(containers_folder):
+            count += 1
+            logging.info(f"Found {containers_folder} folder")
+        if os.path.exists(configurations_folder):
+            count += 1
+            logging.info(f"Found {configurations_folder} folder")
+
+        if count != 4:
+            print("Folder Missing, Exit")
+            exit(1)
         self.results = results_folder
 
         return results_folder, containers_folder, configurations_folder
