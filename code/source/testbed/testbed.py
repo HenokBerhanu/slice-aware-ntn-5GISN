@@ -47,11 +47,11 @@ class Testbed(object):
         self.scenario.generate_networks()
         self.scenario.generate_topology()
         self.scenario.configure_services()
-        self.scenario.write_configuration()
+        #self.scenario.write_configuration()
         self.scenario.configure_compose()
         self.scenario.configure_entrypoint()
-        self.scenario.write_entrypoint()
-        self.scenario.write_compose()
+        #self.scenario.write_entrypoint()
+        #self.scenario.write_compose()
 
     def run(self, iteration: int, pcap: bool):
         """Run the embedded scenario on the testbed"""
