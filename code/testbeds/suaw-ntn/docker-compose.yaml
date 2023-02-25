@@ -1,3 +1,4 @@
+%YAML
 version: '3.9'
 services:
   amf:
@@ -297,24 +298,170 @@ services:
         ipv4_address: 172.16.4.2
     depends_on:
       - nrf
+  ############========SATELLIE LINK========############
+  ############========SATELLIE LINK========############
+  ############========SATELLIE LINK========############
   trunks-0:
-    container_name: trunks-0
-    image: shynuu/sa-ntn:trunks
-    entrypoint: ./entrypoint.sh
+   container_name: trunks-0
+   image: shynuu/sa-ntn:trunks
+   entrypoint: ./entrypoint.sh
+   volumes:
+     - /home/b327zhan/slice-aware-ntn-5GISN/code/testbeds/suaw-ntn/configurations/trunks-0.yaml:/trunks/trunks.yaml
+     - /home/b327zhan/slice-aware-ntn-5GISN/code/testbeds/suaw-ntn/containers/trunks-0.sh:/trunks/entrypoint.sh
+   cap_add:
+     - NET_ADMIN
+   environment:
+     GIN_MODE: release
+   networks:
+     st-classifier-0:
+       ipv4_address: 172.16.5.3
+     gw-classifier-0:
+      ipv4_address: 172.16.6.3
+   depends_on:
+     - ntnqof
+
+  satellite:
+    container_name: ${SAT_CONTAINER_NAME:-satellite}
+    #image: pavja2/qpep:satellite
+    build: ../../config/containers/main/opensand/satellite/
+    ports:
+      - "3141"
+      - "5358"
+      - "5926"
+      - "${SAT_PORT_NUMBER:-5656}:5656"
     volumes:
-      - /home/b327zhan/slice-aware-ntn-5GISN/code/testbeds/suaw-ntn/configurations/trunks-0.yaml:/trunks/trunks.yaml
-      - /home/b327zhan/slice-aware-ntn-5GISN/code/testbeds/suaw-ntn/containers/trunks-0.sh:/trunks/entrypoint.sh
+      - ../../config/containers/main/opensand/satellite/config:/opensand_config
+      - ../../config/containers/main/opensand/satellite/attenuation_scenario:/attenuation_scenario
+      - ../../config/containers/main/opensand/satellite/delay_scenario:/delay_scenario
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+    networks:
+      emulation:
+        ipv4_address: ${EMU_NETWORK_HEAD:-172.20}.0.2
+    privileged: true
+    environment:
+      DISPLAY: :1
+    depends_on:
+      - "gateway"
+      - "terminal"
+  gateway:
+    container_name: ${GW_CONTAINER_NAME:-gateway}
+    #image: pavja2/qpep:gateway
+    build: ../../config/containers/main/opensand/gateway/
+    ports:
+      - "3141"
+      - "5358"
+      - "5926"
+    volumes:
+      - ../../config/containers/main/opensand/gateway/config:/opensand_config
+      - ../../config/containers/main/opensand/src/:/root/go/src
+    networks:
+      emulation:
+        ipv4_address: ${EMU_NETWORK_HEAD:-172.20}.0.3
+        priority: 900
+      gwlan:
+        ipv4_address: "${GW_NETWORK_HEAD:-172.22}.0.3"
+        priority: 1000
+        ipv6_address: ${GW_IP6_HEAD:-2001:660}:6602:142:0:0:1:1
+    privileged: true
+    cap_add:
+      - ALL
+      - NET_ADMIN
+    devices:
+      - /dev/net/tun
+    sysctls:
+      - net.ipv6.conf.all.disable_ipv6=0
+    environment:
+      GOPATH: /root/go
+  terminal:
+    container_name: ${ST_CONTAINER_NAME:-terminal}
+    #image: pavja2/qpep:terminal
+    build: ../../config/containers/main/opensand/terminal/
+    ports:
+      - "3141"
+      - "5358"
+      - "5926"
+    volumes:
+      - ../../config/containers/main/opensand/terminal/config:/opensand_config
+      - ../../config/containers/main/opensand/src/:/root/go/src
+    environment:
+      GOPATH: /root/go
+    networks:
+      emulation:
+        ipv4_address: ${EMU_NETWORK_HEAD:-172.20}.0.4
+        priority: 900
+      stlan:
+        ipv4_address: "${ST_NETWORK_HEAD:-172.21}.0.4"
+        priority: 1000
+        ipv6_address: ${ST_IP6_HEAD:-2001:661}:6602:142:0:0:1:2
+    privileged: true
+    cap_add:
+      - ALL
+      - NET_ADMIN
+    devices:
+      - /dev/net/tun
+    sysctls:
+      - net.ipv6.conf.all.disable_ipv6=0
+  ws-st:
+    container_name: ${WS_ST_CONTAINER_NAME:-ws-st}
+    #image: pavja2/qpep:ws-st
+    build: ../../config/containers/main/opensand/ws-st/
+    networks:
+      stlan:
+        ipv4_address: "${ST_NETWORK_HEAD:-172.21}.0.9"
+      gui:
+        ipv4_address: "${GUI_NETWORK_HEAD:-172.25}.0.9"
+    privileged: true
     cap_add:
       - NET_ADMIN
+    sysctls:
+      - net.ipv6.conf.all.disable_ipv6=1
     environment:
-      GIN_MODE: release
+      DISPLAY:
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+  ws-gw:
+    container_name: ${WS_GW_CONTAINER_NAME:-ws-gw}
+    #image: pavja2/qpep:ws-gw
+    build: ../../config/containers/main/opensand/ws-gw/
     networks:
-      st-classifier-0:
-        ipv4_address: 172.16.5.3
-      gw-classifier-0:
-        ipv4_address: 172.16.6.3
-    depends_on:
-      - ntnqof
+      gwlan:
+        ipv4_address: "${GW_NETWORK_HEAD:-172.22}.0.9"
+    privileged: true
+    cap_add:
+      - NET_ADMIN
+    sysctls:
+      - net.ipv6.conf.all.disable_ipv6=0
+    volumes:
+      - "../../config/containers/main/opensand/src/:/root/go/src"
+      - "../../config/containers/main/opensand/ws-gw/config:/opensand_config"
+  ws-ovpn:
+    container_name: ${WS_OVPN_CONTAINER_NAME:-ws-ovpn}
+    #image: pavja2/qpep:ws-ovpn
+    build: ../../config/containers/main/opensand/ws-ovpn/
+    cap_add:
+      - NET_ADMIN
+    ports:
+      - "${WS_OVPN_PORT:-1994}:1994/udp"
+    volumes:
+      - ../../config/containers/main/opensand/ws-ovpn/:/etc/openvpn
+    sysctls:
+      - net.ipv6.conf.all.disable_ipv6= 1
+    networks:
+      gwlan:
+        ipv4_address: "${GW_NETWORK_HEAD:-172.22}.0.10"
+  sitespeed:
+    container_name: ${SITESPEED_CONTAINER_NAME:-sitespeed}
+    build: ../../config/containers/main/opensand/sitespeed/
+    cap_add:
+      - NET_ADMIN
+    sysctls:
+      - net.ipv6.conf.all.disable_ipv6=1
+    networks:
+      stlan:
+        ipv4_address: "${ST_NETWORK_HEAD:-172.21}.0.15"
+  ############========SATELLIE LINK========############
+  ############========SATELLIE LINK========############
+  ############========SATELLIE LINK========############
   udm:
     container_name: udm
     image: shynuu/sa-ntn:udm
@@ -415,6 +562,45 @@ services:
       ue-network-slice-0:
         ipv4_address: 172.16.2.101
 networks:
+  ############========SATELLIE Network========############
+  ############========SATELLIE Network========############
+  ############========SATELLIE Network========############
+  emulation:
+    name: ${EMU_NETWORK_NAME:-emulation}
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: "${EMU_NETWORK_HEAD:-172.20}.0.0/24"
+  gwlan:
+    name: ${GW_NETWORK_NAME:-gwlan}
+    driver: bridge
+    enable_ipv6: true
+    ipam:
+      driver: default
+      config:
+        - subnet: "${GW_NETWORK_HEAD:-172.22}.0.0/24"
+        - subnet: "${GW_IP6_HEAD:-2001:660}:6602:142::1/64"
+  stlan:
+    name: ${ST_NETWORK_NAME:-stlan}
+    driver: bridge
+    enable_ipv6: true
+    ipam:
+      driver: default
+      config:
+        - subnet: "${ST_NETWORK_HEAD:-172.21}.0.0/24"
+        - subnet: "${ST_IP6_HEAD:-2001:661}:6602:142::1/64"
+  gui:
+    name: ${GUI_NETWORK_NAME:-gui}
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: "${GUI_NETWORK_HEAD:-172.25}.0.0/24"
+          gateway: "${GUI_NETWORK_HEAD:-172.25}.0.1"
+  ############========SATELLIE Network========############
+  ############========SATELLIE Network========############
+  ############========SATELLIE Network========############
   classifier-cn-dp-0:
     name: classifier-cn-dp-0
     driver: bridge
