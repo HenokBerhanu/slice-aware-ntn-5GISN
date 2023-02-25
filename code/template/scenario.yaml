@@ -55,7 +55,7 @@ saw-ntn: # Define the name of the scenario
 
 suaw-ntn: # Define the name of the scenario
   type: "non-slice-aware" # The type of scenario
-  duration: 240 # The total duration of the scenario in seconds
+  duration: 30 # The total duration of the scenario in seconds
   user: 3 # specify the number of User Equipments
   links: # Define the NTN links with each slice supported inside
     - default: true # Define if this link is the default one for 5G Control Plane
@@ -66,7 +66,7 @@ suaw-ntn: # Define the name of the scenario
       acm: false # activate or not the ACM mechanism
       slices: # list each slice of the simulation with their parameters which will use this NTN Link
         - start: 0 # Specify the start time of the traffic for this slice
-          end: 240 # Specify the duration time of the traffic for this slice
+          end: 30 # Specify the duration time of the traffic for this slice
           theta: # specify the theta parameter for the interface between the mobile and NTN networks
             lambda: 45 # the targeted latency in ms
             delta: 5 # the acceptable jigue in ms
