@@ -1,0 +1,64 @@
+info:
+  version: 1.0.0
+  description: NTN initial local configuration
+
+configuration:
+  NtnName: NTNQOF # the name of this QOF
+  sbi: # Service-based interface information
+    scheme: http # the protocol for sbi (http or https)
+    registerIPv4: 172.16.0.14 # IP used to register to NRF
+    bindingIPv4: 172.16.0.14 # IP used to bind the service
+    port: 8000 # Port used to bind the service
+    tls: # the local path of TLS key
+      key: free5gc/support/TLS/qof.key # QOF TLS Certificate
+      pem: free5gc/support/TLS/qof.pem # QOF TLS Private key
+  nrfUri: http://172.16.0.3:8000 # a valid URI of NRF
+  qos: # QoS translation table, associates a 5QI with an IP DSCP field
+    0x2e: 0x2c
+    0x0a: 0x0a
+  defaultSlice: 1
+  slice_aware: false # Define if the NTNQOF is Slice Aware
+  slice: # Slice translation table based on S-NSSAI
+    - id: 0
+      classifier-ran-endpoint: 172.16.5.2
+      classifier-cn-endpoint: 172.16.6.2
+      forward: 35
+      return: 10
+  classifiers:
+    ran:
+      registerIPv4: 172.16.7.2
+      port: 9090
+      ingress:
+        - 172.16.8.3
+      egress:
+        - 172.16.5.2
+    cn:
+      registerIPv4: 172.16.7.3
+      port: 9090
+      ingress:
+        - 172.16.1.3
+        - 172.16.0.13
+      egress:
+        - 172.16.6.2
+logger:
+  QOF:
+    debugLevel: info
+    ReportCaller: false
+  NAS:
+    debugLevel: info
+    ReportCaller: false
+  NGAP:
+    debugLevel: info
+    ReportCaller: false
+  Aper:
+    debugLevel: info
+    ReportCaller: false
+  PathUtil:
+    debugLevel: info
+    ReportCaller: false
+  OpenApi:
+    debugLevel: info
+    ReportCaller: false
+  PFCP:
+    debugLevel: info
+    ReportCaller: false

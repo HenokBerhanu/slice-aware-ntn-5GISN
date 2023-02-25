@@ -1,0 +1,509 @@
+version: '3.9'
+services:
+  amf:
+    container_name: amf
+    image: shynuu/sa-ntn:amf
+    entrypoint: ./entrypoint.sh
+    volumes:
+      - /home/b327zhan/slice-aware-ntn-5GISN/code/testbeds/suaw-ntn/configurations/amf.yaml:/amf/amfcfg.yaml
+      - /home/b327zhan/slice-aware-ntn-5GISN/code/testbeds/suaw-ntn/containers/amf.sh:/amf/entrypoint.sh
+    cap_add:
+      - NET_ADMIN
+    environment:
+      GIN_MODE: release
+    networks:
+      sbi:
+        ipv4_address: 172.16.0.10
+    depends_on:
+      - nrf
+  app-server-ue-0-voip-slice-0:
+    tty: true
+    container_name: app-server-ue-0-voip-slice-0
+    image: shynuu/sa-ntn:application
+    entrypoint: ./entrypoint.sh
+    volumes:
+      - /home/b327zhan/slice-aware-ntn-5GISN/code/testbeds/suaw-ntn/containers/app-server-ue-0-voip-slice-0.sh:/application/entrypoint.sh
+      - /home/b327zhan/slice-aware-ntn-5GISN/code/testbeds/suaw-ntn/results:/application/results
+    cap_add:
+      - NET_ADMIN
+    environment:
+      GIN_MODE: release
+    networks:
+      data-network-slice-0:
+        ipv4_address: 172.16.3.3
+  app-server-ue-0-web-slice-0:
+    tty: true
+    container_name: app-server-ue-0-web-slice-0
+    image: shynuu/sa-ntn:application
+    entrypoint: ./entrypoint.sh
+    volumes:
+      - /home/b327zhan/slice-aware-ntn-5GISN/code/testbeds/suaw-ntn/containers/app-server-ue-0-web-slice-0.sh:/application/entrypoint.sh
+      - /home/b327zhan/slice-aware-ntn-5GISN/code/testbeds/suaw-ntn/results:/application/results
+    cap_add:
+      - NET_ADMIN
+    environment:
+      GIN_MODE: release
+    networks:
+      data-network-slice-0:
+        ipv4_address: 172.16.3.4
+  app-server-ue-1-voip-slice-0:
+    tty: true
+    container_name: app-server-ue-1-voip-slice-0
+    image: shynuu/sa-ntn:application
+    entrypoint: ./entrypoint.sh
+    volumes:
+      - /home/b327zhan/slice-aware-ntn-5GISN/code/testbeds/suaw-ntn/containers/app-server-ue-1-voip-slice-0.sh:/application/entrypoint.sh
+      - /home/b327zhan/slice-aware-ntn-5GISN/code/testbeds/suaw-ntn/results:/application/results
+    cap_add:
+      - NET_ADMIN
+    environment:
+      GIN_MODE: release
+    networks:
+      data-network-slice-0:
+        ipv4_address: 172.16.3.5
+  app-server-ue-1-web-slice-0:
+    tty: true
+    container_name: app-server-ue-1-web-slice-0
+    image: shynuu/sa-ntn:application
+    entrypoint: ./entrypoint.sh
+    volumes:
+      - /home/b327zhan/slice-aware-ntn-5GISN/code/testbeds/suaw-ntn/containers/app-server-ue-1-web-slice-0.sh:/application/entrypoint.sh
+      - /home/b327zhan/slice-aware-ntn-5GISN/code/testbeds/suaw-ntn/results:/application/results
+    cap_add:
+      - NET_ADMIN
+    environment:
+      GIN_MODE: release
+    networks:
+      data-network-slice-0:
+        ipv4_address: 172.16.3.6
+  app-server-ue-2-voip-slice-0:
+    tty: true
+    container_name: app-server-ue-2-voip-slice-0
+    image: shynuu/sa-ntn:application
+    entrypoint: ./entrypoint.sh
+    volumes:
+      - /home/b327zhan/slice-aware-ntn-5GISN/code/testbeds/suaw-ntn/containers/app-server-ue-2-voip-slice-0.sh:/application/entrypoint.sh
+      - /home/b327zhan/slice-aware-ntn-5GISN/code/testbeds/suaw-ntn/results:/application/results
+    cap_add:
+      - NET_ADMIN
+    environment:
+      GIN_MODE: release
+    networks:
+      data-network-slice-0:
+        ipv4_address: 172.16.3.7
+  app-server-ue-2-web-slice-0:
+    tty: true
+    container_name: app-server-ue-2-web-slice-0
+    image: shynuu/sa-ntn:application
+    entrypoint: ./entrypoint.sh
+    volumes:
+      - /home/b327zhan/slice-aware-ntn-5GISN/code/testbeds/suaw-ntn/containers/app-server-ue-2-web-slice-0.sh:/application/entrypoint.sh
+      - /home/b327zhan/slice-aware-ntn-5GISN/code/testbeds/suaw-ntn/results:/application/results
+    cap_add:
+      - NET_ADMIN
+    environment:
+      GIN_MODE: release
+    networks:
+      data-network-slice-0:
+        ipv4_address: 172.16.3.8
+  ausf:
+    container_name: ausf
+    image: shynuu/sa-ntn:ausf
+    command: --config ausfcfg.yaml
+    volumes:
+      - /home/b327zhan/slice-aware-ntn-5GISN/code/testbeds/suaw-ntn/configurations/ausf.yaml:/ausf/ausfcfg.yaml
+    environment:
+      GIN_MODE: release
+    networks:
+      sbi:
+        ipv4_address: 172.16.0.4
+    depends_on:
+      - nrf
+  classifier-cn:
+    container_name: classifier-cn
+    image: bzhang888/sa-ntn:classifier
+    entrypoint: ./entrypoint.sh
+    volumes:
+      - /home/b327zhan/slice-aware-ntn-5GISN/code/testbeds/suaw-ntn/configurations/classifier-cn.yaml:/classifier/classifier.yaml
+      - /home/b327zhan/slice-aware-ntn-5GISN/code/testbeds/suaw-ntn/containers/classifier-cn.sh:/classifier/entrypoint.sh
+    cap_add:
+      - NET_ADMIN
+    environment:
+      GIN_MODE: release
+    networks:
+      satellite-control:
+        ipv4_address: 172.16.7.3
+      sbi:
+        ipv4_address: 172.16.0.13
+      classifier-cn-dp-0:
+        ipv4_address: 172.16.1.3
+      gw-classifier-0:
+        ipv4_address: 172.16.6.2
+  classifier-ran:
+    container_name: classifier-ran
+    image: bzhang888/sa-ntn:classifier
+    entrypoint: ./entrypoint.sh
+    volumes:
+      - /home/b327zhan/slice-aware-ntn-5GISN/code/testbeds/suaw-ntn/configurations/classifier-ran.yaml:/classifier/classifier.yaml
+      - /home/b327zhan/slice-aware-ntn-5GISN/code/testbeds/suaw-ntn/containers/classifier-ran.sh:/classifier/entrypoint.sh
+    cap_add:
+      - NET_ADMIN
+    environment:
+      GIN_MODE: release
+    networks:
+      satellite-control:
+        ipv4_address: 172.16.7.2
+      classifier-ran:
+        ipv4_address: 172.16.8.3
+      st-classifier-0:
+        ipv4_address: 172.16.5.2
+  gnb:
+    container_name: gnb
+    image: shynuu/sa-ntn:gnb
+    entrypoint: ./entrypoint.sh
+    volumes:
+      - /home/b327zhan/slice-aware-ntn-5GISN/code/testbeds/suaw-ntn/configurations/gnb.yaml:/ueransim/gnb.yaml
+      - /home/b327zhan/slice-aware-ntn-5GISN/code/testbeds/suaw-ntn/containers/gnb.sh:/ueransim/entrypoint.sh
+    cap_add:
+      - NET_ADMIN
+    networks:
+      ran-link-sim:
+        ipv4_address: 172.16.9.2
+      classifier-ran:
+        ipv4_address: 172.16.8.2
+    depends_on:
+      - nrf
+      - amf
+      - smf
+      - pcf
+      - ausf
+      - qof
+      - ntnqof
+      - classifier-ran
+      - classifier-cn
+      - trunks-0
+  mongo:
+    container_name: mongo
+    image: mongo:4.4.14
+    command: mongod --port 27017
+    expose:
+      - '27017'
+    volumes:
+      - dbdata:/data/db
+    networks:
+      sbi:
+        ipv4_address: 172.16.0.2
+  nrf:
+    container_name: nrf
+    image: shynuu/sa-ntn:nrf
+    command: --config nrfcfg.yaml
+    volumes:
+      - /home/b327zhan/slice-aware-ntn-5GISN/code/testbeds/suaw-ntn/configurations/nrf.yaml:/nrf/nrfcfg.yaml
+    environment:
+      GIN_MODE: release
+    networks:
+      sbi:
+        ipv4_address: 172.16.0.3
+    depends_on:
+      - mongo
+  nssf:
+    container_name: nssf
+    image: shynuu/sa-ntn:nssf
+    command: --config nssfcfg.yaml
+    volumes:
+      - /home/b327zhan/slice-aware-ntn-5GISN/code/testbeds/suaw-ntn/configurations/nssf.yaml:/nssf/nssfcfg.yaml
+    environment:
+      GIN_MODE: release
+    networks:
+      sbi:
+        ipv4_address: 172.16.0.9
+    depends_on:
+      - nrf
+  ntnqof:
+    container_name: ntnqof
+    image: shynuu/sa-ntn:ntnqof
+    command: --ntncfg ntnqof.yaml
+    volumes:
+      - /home/b327zhan/slice-aware-ntn-5GISN/code/testbeds/suaw-ntn/configurations/ntnqof.yaml:/ntnqof/ntnqof.yaml
+    cap_add:
+      - NET_ADMIN
+    environment:
+      GIN_MODE: release
+    networks:
+      satellite-control:
+        ipv4_address: 172.16.7.4
+      sbi:
+        ipv4_address: 172.16.0.14
+    depends_on:
+      - classifier-ran
+      - classifier-cn
+  pcf:
+    container_name: pcf
+    image: shynuu/sa-ntn:pcf
+    command: --config pcfcfg.yaml
+    volumes:
+      - /home/b327zhan/slice-aware-ntn-5GISN/code/testbeds/suaw-ntn/configurations/pcf.yaml:/pcf/pcfcfg.yaml
+    cap_add:
+      - NET_ADMIN
+    environment:
+      GIN_MODE: release
+    networks:
+      sbi:
+        ipv4_address: 172.16.0.5
+    depends_on:
+      - nrf
+  populate:
+    container_name: populate
+    image: shynuu/sa-ntn:populate
+    command: --config populatecfg.yaml
+    volumes:
+      - /home/b327zhan/slice-aware-ntn-5GISN/code/testbeds/suaw-ntn/configurations/populate.yaml:/populate/populatecfg.yaml
+    environment:
+      GIN_MODE: release
+    networks:
+      sbi:
+        ipv4_address: 172.16.0.12
+    depends_on:
+      - mongo
+      - amf
+      - nrf
+  qof:
+    container_name: qof
+    image: shynuu/sa-ntn:qof
+    command: --qofcfg qofcfg.yaml
+    volumes:
+      - /home/b327zhan/slice-aware-ntn-5GISN/code/testbeds/suaw-ntn/configurations/qof.yaml:/qof/qofcfg.yaml
+    environment:
+      GIN_MODE: release
+    networks:
+      sbi:
+        ipv4_address: 172.16.0.11
+    depends_on:
+      - nrf
+      - ntnqof
+  smf:
+    container_name: smf
+    image: shynuu/sa-ntn:smf
+    command: --config smfcfg.yaml --uerouting uerouting.yaml
+    volumes:
+      - /home/b327zhan/slice-aware-ntn-5GISN/code/testbeds/suaw-ntn/configurations/smf.yaml:/smf/smfcfg.yaml
+      - /home/b327zhan/slice-aware-ntn-5GISN/code/testbeds/suaw-ntn/configurations/uerouting.yaml:/smf/uerouting.yaml
+    cap_add:
+      - NET_ADMIN
+    networks:
+      sbi:
+        ipv4_address: 172.16.0.8
+      pfcp:
+        ipv4_address: 172.16.4.2
+    depends_on:
+      - nrf
+  trunks-0:
+    container_name: trunks-0
+    image: shynuu/sa-ntn:trunks
+    entrypoint: ./entrypoint.sh
+    volumes:
+      - /home/b327zhan/slice-aware-ntn-5GISN/code/testbeds/suaw-ntn/configurations/trunks-0.yaml:/trunks/trunks.yaml
+      - /home/b327zhan/slice-aware-ntn-5GISN/code/testbeds/suaw-ntn/containers/trunks-0.sh:/trunks/entrypoint.sh
+    cap_add:
+      - NET_ADMIN
+    environment:
+      GIN_MODE: release
+    networks:
+      st-classifier-0:
+        ipv4_address: 172.16.5.3
+      gw-classifier-0:
+        ipv4_address: 172.16.6.3
+    depends_on:
+      - ntnqof
+  udm:
+    container_name: udm
+    image: shynuu/sa-ntn:udm
+    command: --config udmcfg.yaml
+    volumes:
+      - /home/b327zhan/slice-aware-ntn-5GISN/code/testbeds/suaw-ntn/configurations/udm.yaml:/udm/udmcfg.yaml
+    environment:
+      GIN_MODE: release
+    networks:
+      sbi:
+        ipv4_address: 172.16.0.6
+    depends_on:
+      - nrf
+  udr:
+    container_name: udr
+    image: shynuu/sa-ntn:udr
+    command: --config udrcfg.yaml
+    volumes:
+      - /home/b327zhan/slice-aware-ntn-5GISN/code/testbeds/suaw-ntn/configurations/udr.yaml:/udr/udrcfg.yaml
+    environment:
+      GIN_MODE: release
+    networks:
+      sbi:
+        ipv4_address: 172.16.0.7
+    depends_on:
+      - nrf
+  ue-0:
+    container_name: ue-0
+    image: shynuu/sa-ntn:ue
+    command: --config ue.yaml
+    volumes:
+      - /home/b327zhan/slice-aware-ntn-5GISN/code/testbeds/suaw-ntn/configurations/ue-0.yaml:/ue/ue.yaml
+      - /home/b327zhan/slice-aware-ntn-5GISN/code/testbeds/suaw-ntn/results:/ue/results
+      - /home/b327zhan/slice-aware-ntn-5GISN/code/testbeds/suaw-ntn/containers/ue-0-slice-0-app.sh:/ue/slice-0-app.sh
+    cap_add:
+      - NET_ADMIN
+    devices:
+      - /dev/net/tun
+    networks:
+      ran-link-sim:
+        ipv4_address: 172.16.9.3
+    depends_on:
+      - gnb
+  ue-1:
+    container_name: ue-1
+    image: shynuu/sa-ntn:ue
+    command: --config ue.yaml
+    volumes:
+      - /home/b327zhan/slice-aware-ntn-5GISN/code/testbeds/suaw-ntn/configurations/ue-1.yaml:/ue/ue.yaml
+      - /home/b327zhan/slice-aware-ntn-5GISN/code/testbeds/suaw-ntn/results:/ue/results
+      - /home/b327zhan/slice-aware-ntn-5GISN/code/testbeds/suaw-ntn/containers/ue-1-slice-0-app.sh:/ue/slice-0-app.sh
+    cap_add:
+      - NET_ADMIN
+    devices:
+      - /dev/net/tun
+    networks:
+      ran-link-sim:
+        ipv4_address: 172.16.9.4
+    depends_on:
+      - gnb
+      - ue-0
+  ue-2:
+    container_name: ue-2
+    image: shynuu/sa-ntn:ue
+    command: --config ue.yaml
+    volumes:
+      - /home/b327zhan/slice-aware-ntn-5GISN/code/testbeds/suaw-ntn/configurations/ue-2.yaml:/ue/ue.yaml
+      - /home/b327zhan/slice-aware-ntn-5GISN/code/testbeds/suaw-ntn/results:/ue/results
+      - /home/b327zhan/slice-aware-ntn-5GISN/code/testbeds/suaw-ntn/containers/ue-2-slice-0-app.sh:/ue/slice-0-app.sh
+    cap_add:
+      - NET_ADMIN
+    devices:
+      - /dev/net/tun
+    networks:
+      ran-link-sim:
+        ipv4_address: 172.16.9.5
+    depends_on:
+      - gnb
+      - ue-0
+      - ue-1
+  upf-0:
+    container_name: upf-0
+    image: shynuu/sa-ntn:upf
+    entrypoint: ./entrypoint.sh
+    volumes:
+      - /home/b327zhan/slice-aware-ntn-5GISN/code/testbeds/suaw-ntn/configurations/upf-0.yaml:/upf/upfcfg.yaml
+      - /home/b327zhan/slice-aware-ntn-5GISN/code/testbeds/suaw-ntn/containers/upf-0.sh:/upf/entrypoint.sh
+      - /home/b327zhan/slice-aware-ntn-5GISN/code/testbeds/suaw-ntn/results:/upf/results
+    cap_add:
+      - NET_ADMIN
+    networks:
+      pfcp:
+        ipv4_address: 172.16.4.3
+      classifier-cn-dp-0:
+        ipv4_address: 172.16.1.2
+      data-network-slice-0:
+        ipv4_address: 172.16.3.2
+      ue-network-slice-0:
+        ipv4_address: 172.16.2.101
+networks:
+  classifier-cn-dp-0:
+    name: classifier-cn-dp-0
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.16.1.0/24
+    driver_opts:
+      com.docker.network.bridge.name: network-0
+  classifier-ran:
+    name: classifier-ran
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.16.8.0/24
+    driver_opts:
+      com.docker.network.bridge.name: network-1
+  data-network-slice-0:
+    name: data-network-slice-0
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.16.3.0/24
+    driver_opts:
+      com.docker.network.bridge.name: network-2
+  gw-classifier-0:
+    name: gw-classifier-0
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.16.6.0/24
+    driver_opts:
+      com.docker.network.bridge.name: network-3
+  pfcp:
+    name: pfcp
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.16.4.0/24
+    driver_opts:
+      com.docker.network.bridge.name: network-4
+  ran-link-sim:
+    name: ran-link-sim
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.16.9.0/24
+    driver_opts:
+      com.docker.network.bridge.name: network-5
+  satellite-control:
+    name: satellite-control
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.16.7.0/24
+    driver_opts:
+      com.docker.network.bridge.name: network-6
+  sbi:
+    name: sbi
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.16.0.0/24
+    driver_opts:
+      com.docker.network.bridge.name: network-7
+  st-classifier-0:
+    name: st-classifier-0
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.16.5.0/24
+    driver_opts:
+      com.docker.network.bridge.name: network-8
+  ue-network-slice-0:
+    name: ue-network-slice-0
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.16.2.0/24
+    driver_opts:
+      com.docker.network.bridge.name: network-9
+volumes:
+  dbdata:

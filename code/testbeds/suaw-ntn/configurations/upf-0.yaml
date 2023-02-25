@@ -1,0 +1,23 @@
+info:
+  version: 1.0.0
+  description: UPF configuration
+
+configuration:
+  # the kind of log output
+  # debugLevel: how detailed to output, value: trace, debug, info, warn, error, fatal, panic
+  # ReportCaller: enable the caller report or not, value: true or false
+  debugLevel: info
+  ReportCaller: false
+
+  # packetBufferHoldTime should be longer than Paging retry-out time of AMF.
+  # unit: seconds
+  packetBufferHoldTime: 30
+
+  # The IP list of the N4 interface on this UPF (Can't set to 0.0.0.0)
+  pfcp:
+    - addr: 172.16.4.3
+  gtpu:
+    - addr: 172.16.1.2
+  dnn_list:
+    - dnn: internet
+      cidr: 172.16.2.0/24

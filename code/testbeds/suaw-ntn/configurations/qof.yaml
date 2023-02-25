@@ -1,0 +1,56 @@
+info:
+  version: 1.0.0
+  description: NTN initial local configuration
+
+configuration:
+  QofName: QOF # the name of this QOF
+  sbi: # Service-based interface information
+    scheme: http # the protocol for sbi (http or https)
+    registerIPv4: 172.16.0.11 # IP used to register to NRF
+    bindingIPv4: 172.16.0.11 # IP used to bind the service
+    port: 8090 # Port used to bind the service
+    tls: # the local path of TLS key
+      key: free5gc/support/TLS/ntn.key # QOF TLS Certificate
+      pem: free5gc/support/TLS/ntn.pem # QOF TLS Private key
+  nrfUri: http://172.16.0.3:8000 # a valid URI of NRF
+  qos: # QoS translation table, associates a 5QI with an IP DSCP field
+    9: 0x0a
+    6: 0x0c
+    7: 0x2e
+  slice: # Slice translation table based on S-NSSAI
+    - sNssai:
+        sst: 1
+        sd: 110101
+      ran: 172.16.8.2
+      cn: 172.16.1.2
+      id: 0
+      default: true
+      amf: 172.16.0.10
+  ntnUri: http://172.16.0.14:8000
+
+# the kind of log output
+# debugLevel: how detailed to output, value: trace, debug, info, warn, error, fatal, panic
+# ReportCaller: enable the caller report or not, value: true or false
+  qofName: QOF
+logger:
+  QOF:
+    debugLevel: info
+    ReportCaller: false
+  NAS:
+    debugLevel: info
+    ReportCaller: false
+  NGAP:
+    debugLevel: info
+    ReportCaller: false
+  Aper:
+    debugLevel: info
+    ReportCaller: false
+  PathUtil:
+    debugLevel: info
+    ReportCaller: false
+  OpenApi:
+    debugLevel: info
+    ReportCaller: false
+  PFCP:
+    debugLevel: info
+    ReportCaller: false
