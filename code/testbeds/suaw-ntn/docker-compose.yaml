@@ -301,28 +301,29 @@ services:
   ############========SATELLIE LINK========############
   ############========SATELLIE LINK========############
   trunks-0:
-   container_name: trunks-0
-   image: shynuu/sa-ntn:trunks
-   entrypoint: ./entrypoint.sh
-   volumes:
-     - /home/b327zhan/slice-aware-ntn-5GISN/code/testbeds/suaw-ntn/configurations/trunks-0.yaml:/trunks/trunks.yaml
-     - /home/b327zhan/slice-aware-ntn-5GISN/code/testbeds/suaw-ntn/containers/trunks-0.sh:/trunks/entrypoint.sh
-   cap_add:
-     - NET_ADMIN
-   environment:
-     GIN_MODE: release
-   networks:
-     st-classifier-0:
-       ipv4_address: 172.16.5.3
-     gw-classifier-0:
-      ipv4_address: 172.16.6.3
-   depends_on:
-     - ntnqof
+    container_name: trunks-0
+    image: shynuu/sa-ntn:trunks
+    entrypoint: ./entrypoint.sh
+    volumes:
+      - /home/b327zhan/slice-aware-ntn-5GISN/code/testbeds/suaw-ntn/configurations/trunks-0.yaml:/trunks/trunks.yaml
+      - /home/b327zhan/slice-aware-ntn-5GISN/code/testbeds/suaw-ntn/containers/trunks-0.sh:/trunks/entrypoint.sh
+    cap_add:
+      - NET_ADMIN
+    environment:
+      GIN_MODE: release
+    networks:
+      st-classifier-0:
+        ipv4_address: 172.16.5.30
+      gw-classifier-0:
+        ipv4_address: 172.16.6.30
+    depends_on:
+      - ntnqof
 
   satellite:
     container_name: ${SAT_CONTAINER_NAME:-satellite}
     #image: pavja2/qpep:satellite
     build: ../../config/containers/main/opensand/satellite/
+      #entrypoint: ./entrypoint.sh
     ports:
       - "3141"
       - "5358"
@@ -335,13 +336,15 @@ services:
       - /tmp/.X11-unix:/tmp/.X11-unix:rw
     networks:
       emulation:
-        ipv4_address: ${EMU_NETWORK_HEAD:-172.20}.0.2
+        ipv4_address: ${EMU_NETWORK_HEAD:-172.16}.100.2
     privileged: true
     environment:
       DISPLAY: :1
+      GIN_MODE: release
     depends_on:
       - "gateway"
       - "terminal"
+      - "ntnqof"
   gateway:
     container_name: ${GW_CONTAINER_NAME:-gateway}
     #image: pavja2/qpep:gateway
@@ -354,8 +357,10 @@ services:
       - ../../config/containers/main/opensand/gateway/config:/opensand_config
       - ../../config/containers/main/opensand/src/:/root/go/src
     networks:
+      gw-classifier-0:
+        ipv4_address: 172.16.6.3
       emulation:
-        ipv4_address: ${EMU_NETWORK_HEAD:-172.20}.0.3
+        ipv4_address: ${EMU_NETWORK_HEAD:-172.16}.100.3
         priority: 900
       gwlan:
         ipv4_address: "${GW_NETWORK_HEAD:-172.22}.0.3"
@@ -371,6 +376,7 @@ services:
       - net.ipv6.conf.all.disable_ipv6=0
     environment:
       GOPATH: /root/go
+      GIN_MODE: release
   terminal:
     container_name: ${ST_CONTAINER_NAME:-terminal}
     #image: pavja2/qpep:terminal
@@ -384,9 +390,12 @@ services:
       - ../../config/containers/main/opensand/src/:/root/go/src
     environment:
       GOPATH: /root/go
+      GIN_MODE: release
     networks:
+      st-classifier-0:
+        ipv4_address: 172.16.5.3
       emulation:
-        ipv4_address: ${EMU_NETWORK_HEAD:-172.20}.0.4
+        ipv4_address: ${EMU_NETWORK_HEAD:-172.16}.100.4
         priority: 900
       stlan:
         ipv4_address: "${ST_NETWORK_HEAD:-172.21}.0.4"
@@ -570,7 +579,9 @@ networks:
     ipam:
       driver: default
       config:
-        - subnet: "${EMU_NETWORK_HEAD:-172.20}.0.0/24"
+        - subnet: "${EMU_NETWORK_HEAD:-172.16}.100.0/24"
+    driver_opts:
+      com.docker.network.bridge.name: network-10
   gwlan:
     name: ${GW_NETWORK_NAME:-gwlan}
     driver: bridge
