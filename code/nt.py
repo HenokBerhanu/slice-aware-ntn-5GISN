@@ -139,7 +139,7 @@ if __name__ == "__main__":
                     s, scenario_folder)
                 scenario.set_path(
                     r, cont, configuration_folder, conf, scenario_folder)
-                testbed.generate()
+                testbed.generate2()
             else:
                 logging.error(
                     f"No scenario corresponding to {s} in the template file, moving to next scenario")
