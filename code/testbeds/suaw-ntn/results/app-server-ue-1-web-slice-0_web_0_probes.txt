@@ -3,7 +3,7 @@ Server listening on UDP port 8080
 TOS will be set to 0x28
 UDP buffer size: 212992 Byte (default)
 ------------------------------------------------------------
-[  1] local 172.16.3.6%eth0 port 8080 connected with 172.16.3.2 port 35208 (reverse) (no-udp-fin) (trip-times) (sock=3) (tos rx=0x28) (peer 2.1.8-rc)
+[  1] local 172.16.3.6%eth0 port 8080 connected with 172.16.3.2 port 47640 (reverse) (no-udp-fin) (trip-times) (sock=3) (tos rx=0x28) (peer 2.1.8-rc)
 [ ID] Interval        Transfer     Bandwidth      Write/Err  PPS
 [  1] 0.00-1.00 sec  394800 Bytes  3158400 bits/sec  281/0      283 pps
 [  1] 1.00-2.00 sec  393400 Bytes  3147200 bits/sec  281/0      281 pps
@@ -35,5 +35,5 @@ UDP buffer size: 212992 Byte (default)
 [  1] 27.00-28.00 sec  393400 Bytes  3147200 bits/sec  281/0      281 pps
 [  1] 28.00-29.00 sec  393400 Bytes  3147200 bits/sec  281/0      281 pps
 [  1] 29.00-30.00 sec  392000 Bytes  3136000 bits/sec  280/0      281 pps
-[  1] 0.00-30.00 sec  11800600 Bytes  3146442 bits/sec  8428/0      281 pps
+[  1] 0.00-30.00 sec  11800600 Bytes  3146449 bits/sec  8428/0      281 pps
 [  1] Sent 8430 datagrams

@@ -335,7 +335,7 @@ services:
       - /tmp/.X11-unix:/tmp/.X11-unix:rw
     networks:
       emulation:
-        ipv4_address: ${EMU_NETWORK_HEAD:-172.16}.100.2
+        ipv4_address: ${EMU_NETWORK_HEAD:-172.20}.0.2
     privileged: true
     environment:
       DISPLAY: :1
@@ -359,7 +359,7 @@ services:
       gw-classifier-0:
         ipv4_address: 172.16.6.3
       emulation:
-        ipv4_address: ${EMU_NETWORK_HEAD:-172.16}.100.3
+        ipv4_address: ${EMU_NETWORK_HEAD:-172.20}.0.3
         priority: 900
       gwlan:
         ipv4_address: "${GW_NETWORK_HEAD:-172.22}.0.3"
@@ -394,7 +394,7 @@ services:
       st-classifier-0:
         ipv4_address: 172.16.5.3
       emulation:
-        ipv4_address: ${EMU_NETWORK_HEAD:-172.16}.100.4
+        ipv4_address: ${EMU_NETWORK_HEAD:-172.20}.0.4
         priority: 900
       stlan:
         ipv4_address: "${ST_NETWORK_HEAD:-172.21}.0.4"
@@ -578,7 +578,7 @@ networks:
     ipam:
       driver: default
       config:
-        - subnet: "${EMU_NETWORK_HEAD:-172.16}.100.0/24"
+        - subnet: "${EMU_NETWORK_HEAD:-172.20}.0.0/24"
     driver_opts:
       com.docker.network.bridge.name: network-10
   gwlan:
