@@ -14,6 +14,6 @@ RUN rm /etc/apt/sources.list.d/opensand.list
 # EXPOSE 5926
 COPY config/term.conf /etc/opensand/daemon.conf
 COPY config/entrypoint.sh /tmp/entrypoint.sh
-RUN chmod +x /tmp/entrypoint.sh
+#RUN chmod +x /tmp/entrypoint.sh
 COPY pepsal /usr/bin/pepsal
-ENTRYPOINT /bin/bash /tmp/entrypoint.sh
+#ENTRYPOINT /bin/bash /tmp/entrypoint.sh

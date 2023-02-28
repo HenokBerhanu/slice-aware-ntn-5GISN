@@ -321,9 +321,8 @@ services:
 
   satellite:
     container_name: ${SAT_CONTAINER_NAME:-satellite}
-    #image: pavja2/qpep:satellite
     build: ../../config/containers/main/opensand/satellite/
-      #entrypoint: ./entrypoint.sh
+    entrypoint: ./opensand_config/entrypoint.sh
     ports:
       - "3141"
       - "5358"
@@ -347,8 +346,8 @@ services:
       - "ntnqof"
   gateway:
     container_name: ${GW_CONTAINER_NAME:-gateway}
-    #image: pavja2/qpep:gateway
     build: ../../config/containers/main/opensand/gateway/
+    entrypoint: ./opensand_config/entrypoint.sh
     ports:
       - "3141"
       - "5358"
@@ -379,8 +378,8 @@ services:
       GIN_MODE: release
   terminal:
     container_name: ${ST_CONTAINER_NAME:-terminal}
-    #image: pavja2/qpep:terminal
     build: ../../config/containers/main/opensand/terminal/
+    entrypoint: ./opensand_config/entrypoint.sh
     ports:
       - "3141"
       - "5358"

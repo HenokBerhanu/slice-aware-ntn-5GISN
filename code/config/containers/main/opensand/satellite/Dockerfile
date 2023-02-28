@@ -1,4 +1,4 @@
-FROM pavja2/qpep:satellite
+FROM pavja2/qpep:satellite 
 RUN rm /etc/apt/sources.list.d/opensand.list
 
 #RUN apt-get install -y  apt-transport-https ca-certificates
@@ -22,5 +22,5 @@ COPY config/sat.conf /etc/opensand/daemon.conf
 COPY config/topology.conf /usr/share/opensand/topology.conf
 #COPY config/core_global.conf /usr/share/opensand/core_global.conf
 COPY config/entrypoint.sh /root/entrypoint.sh
-RUN chmod +x /root/entrypoint.sh
-ENTRYPOINT /bin/bash /root/entrypoint.sh
+#RUN chmod +x /tmp/entrypoint.sh
+#ENTRYPOINT /bin/bash /tmp/entrypoint.sh
