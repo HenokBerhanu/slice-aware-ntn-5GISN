@@ -53,7 +53,7 @@ class Testbed(object):
         #self.scenario.write_entrypoint()
         #self.scenario.write_compose()
         
-    def generate(self):
+    def generate2(self):
         """Generate the testbed corresponding to the embedded scenario"""
         self.scenario.prepare_scenario()
         self.scenario.generate_networks()
