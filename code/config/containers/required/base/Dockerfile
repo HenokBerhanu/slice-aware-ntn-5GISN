@@ -4,7 +4,7 @@ RUN apt-get update && DEBIAN_FRONTEND=non-interactive apt-get install -qy --no-i
     && curl -sL https://deb.nodesource.com/setup_10.x | bash - \
     && rm -rf /var/lib/apt/lists/*
 
-RUN git -C /go/src clone --recursive -b main -j $(nproc) https://github.com/shynuu/5g-core-ntn.git
+RUN git -C /go/src clone --recursive -b main -j $(nproc) https://github.com/zbh888/5g-core-ntn.git
 WORKDIR /go/src/5g-core-ntn/free5gc
 RUN make amf
 RUN make ausf
