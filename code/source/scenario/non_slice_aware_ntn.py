@@ -390,6 +390,7 @@ class NonSliceAwareNTN(Scenario):
                 time.sleep(0.1)
                 _thread.start_new_thread(
                     generate_traffic, (client, k, slice_id, ue_ips,))
+            _thread.start_new_thread(cut_recover, ())
             return schedule.CancelJob
         def cut_recover():
             if len(configCutRecover.TIME) == 0:
