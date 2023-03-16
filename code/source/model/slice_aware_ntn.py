@@ -34,6 +34,7 @@ import codecs
 APPLICATION_WEB = 0x01
 APPLICATION_STREAMING = 0x02
 APPLICATION_VOIP = 0x03
+APPLICATION_BOHAN = 0x04
 MNC = "208"
 MCC = "93"
 
@@ -126,6 +127,30 @@ class Streaming(Application):
 
     def get_data_rate(self):
         return f"{self.data_rate} Mbit/s"
+
+
+class Bohan(Application):
+
+    def __init__(self, data_rate=128):
+        super().__init__("Bohan")
+        self.qi = 7
+        # EF
+        self.ntn_dscp = 0x2c
+        # AF
+        self.terrestrial_dscp = 0x2e
+        self.port = 5060
+        self.data_rate = data_rate
+        self.pdb = 100
+        self.code = APPLICATION_BOHAN
+
+    def generate_server(self, bind, sl, server):
+        return f"iperf -s -B {bind} -p {self.port} -u -l 1400 -i 1 -f b --tos {self.generate_tos()} > {self.get_log_server(server, sl)}"
+
+    def generate_client(self, bind, destination, ue, sl, duration):
+        return f"iperf -c {destination} -B {bind} -p {self.port} --trip-times --tos {self.generate_tos()} -i 1 -u -l 1400 --reverse -t {duration}s -b {self.data_rate}k -f b > {self.get_log_client(ue, sl)} &"
+
+    def get_data_rate(self):
+        return f"{self.data_rate} kbit/s"
 
 
 class Web(Application):
@@ -1275,7 +1300,7 @@ class QOF(Service):
         slices = repository.get_misc("slices")
         default_slice = repository.get_misc("default_slice")
         upfs = repository.get_misc("upfs")
-        applications = [Web(), Streaming(), VoIP()]
+        applications = [Web(), Streaming(), VoIP(), Bohan()]
 
         self.configuration['configuration']['sbi']['registerIPv4'] = str(sbi)
         self.configuration['configuration']['sbi']['bindingIPv4'] = str(sbi)

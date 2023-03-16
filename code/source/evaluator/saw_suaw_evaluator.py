@@ -36,6 +36,7 @@ from ..testbed.testbed import Testbed
 APPLICATION_WEB = 0x01
 APPLICATION_STREAMING = 0x02
 APPLICATION_VOIP = 0x03
+APPLICATION_BOHAN = 0x04
 
 
 class Plot(object):
@@ -101,9 +102,11 @@ class Slice(object):
         voip = [Probe(0, 0, 0, 0) for i in range(len(self.pdu[0].probes))]
         streaming = [Probe(0, 0, 0, 0) for i in range(len(self.pdu[0].probes))]
         web = [Probe(0, 0, 0, 0) for i in range(len(self.pdu[0].probes))]
+        bohan = [Probe(0, 0, 0, 0) for i in range(len(self.pdu[0].probes))]
         vi = 0
         si = 0
         wi = 0
+        bi = 0
 
         probes = None
         for pdu in self.pdu:
@@ -113,6 +116,9 @@ class Slice(object):
             elif pdu.application.code == APPLICATION_STREAMING:
                 probes = streaming
                 si += 1
+            elif pdu.application.code == APPLICATION_BOHAN:
+                probes = bohan
+                bi += 1
             else:
                 probes = web
                 wi += 1
@@ -133,6 +139,18 @@ class Slice(object):
             vdata.legend = f"{'SAW' if self.aware else 'SUAW'} {self.index} - VoIP QFI 7"
             vdata.legend_pdb = f"{'SAW' if self.aware else 'SUAW'} {self.index} - VoIP QFI 7"
             vdata.probes = voip
+            pdus.append(vdata)
+
+        if bi > 0:
+            for i in range(len(bohan)):
+                if type(bohan[i]) != int:
+                    bohan[i].jitter /= bi
+                    bohan[i].trip_time /= bi
+                    bohan[i].loss /= bi
+            vdata = Dataset()
+            vdata.legend = f"{'SAW' if self.aware else 'SUAW'} {self.index} - Bohan QFI 7"
+            vdata.legend_pdb = f"{'SAW' if self.aware else 'SUAW'} {self.index} - Bohan QFI 7"
+            vdata.probes = bohan
             pdus.append(vdata)
 
         if si > 0:
@@ -208,18 +226,26 @@ class Parser(object):
 
     @classmethod
     def parse_throughput(cls, thpt):
+        if thpt == '-':
+            return 0.0
         return float(thpt) / 1000 / 1000
 
     @classmethod
     def parse_jitter(cls, jitter):
+        if jitter == '-':
+            return 0.0
         return float(jitter)
 
     @classmethod
     def parse_trip_time(cls, tt):
+        if tt == '-':
+            return 0.0
         return float(tt)
 
     @classmethod
     def parse_loss(cls, loss):
+        if loss == '-':
+            return 0.0
         regex = r"([0-9]+)"
         rate = re.findall(regex, loss)[0]
         return float(rate)
@@ -245,6 +271,25 @@ class Parser(object):
 
     @classmethod
     def parse_voip_application(cls, lines, duration):
+        k = 0
+        dataset = Dataset()
+        for line in lines:
+            if "received" not in line and k < duration:
+                l = line.strip().split()
+                thpt, jitter, error_rate, rt = l[6], l[8], l[11], l[12].split(
+                    "/")[0]
+                dataset.probes.append(
+                    Probe(cls.parse_throughput(thpt),
+                          cls.parse_trip_time(rt),
+                          cls.parse_loss(error_rate),
+                          cls.parse_jitter(jitter),
+                          )
+                )
+                k += 1
+        return dataset
+
+    @classmethod
+    def parse_bohan_application(cls, lines, duration):
         k = 0
         dataset = Dataset()
         for line in lines:
@@ -293,6 +338,8 @@ class Parser(object):
             dataset = cls.parse_web_application(lines[8::], duration)
         elif application.code == APPLICATION_STREAMING:
             dataset = cls.parse_streaming_application(lines[8::], duration)
+        elif application.code == APPLICATION_BOHAN:
+            dataset = cls.parse_bohan_application(lines[8::], duration)
         else:
             dataset = cls.parse_voip_application(lines[8::], duration)
 
