@@ -204,7 +204,7 @@ if __name__ == "__main__":
             if scenario_conf != None:
                 scenario = Selector.get_scenario(scenario_conf, s)
                 testbed = Testbed(scenario)
-                r, cont, conf = testbed.make_scenario_folders(
+                r, cont, conf = testbed.make_scenario_folders2(
                     s, scenario_folder)
                 scenario.set_path(
                     r, cont, configuration_folder, conf, scenario_folder)
