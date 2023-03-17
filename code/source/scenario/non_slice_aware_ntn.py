@@ -30,7 +30,6 @@ import time
 import schedule
 import re
 import _thread
-import configCutRecover
 from typing import Dict, List
 from . import Scenario
 from ..model.non_slice_aware_ntn import User, Ntn, Slice, Theta, Web, Streaming, VoIP, Bohan
@@ -393,18 +392,18 @@ class NonSliceAwareNTN(Scenario):
             _thread.start_new_thread(cut_recover, ())
             return schedule.CancelJob
         def cut_recover():
-            if len(configCutRecover.TIME) == 0:
+            if len(self.TIME) == 0:
                 print("No Cut/Recover specified")
                 exit(0)
             sleeping = 0
-            for pair in configCutRecover.TIME:
+            for pair in self.TIME:
                 sleeping = pair[0] - sleeping
                 time.sleep(sleeping)
-                subprocess.check_call(("./test.sh %s %s" % (configCutRecover.SERVING_IP, configCutRecover.SERVING_PORT)), shell=True)
+                subprocess.check_call(("./cut.sh %s %s" % (self.SERVING_IP, self.SERVING_PORT)), shell=True)
                 print("CUT at time", str(pair[0]))
                 sleeping = pair[1] - pair[0]
                 time.sleep(sleeping)
-                subprocess.run(("./test.sh %s %s %s" % (configCutRecover.SERVING_IP, configCutRecover.SERVING_PORT, configCutRecover.CONNECT_TO)), shell=True)
+                subprocess.run(("./recover.sh %s %s %s" % (self.SERVING_IP, self.SERVING_PORT, self.CONNECT_TO)), shell=True)
                 print("Recover at time,", str(pair[1]))
                 sleeping = pair[1]
 

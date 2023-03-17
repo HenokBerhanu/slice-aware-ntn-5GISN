@@ -43,6 +43,10 @@ class Scenario(object):
         self.definition = definition
         self.networker = Networker()
         self.repository = Repository()
+        self.SERVING_IP = "172.16.7.3"
+        self.SERVING_PORT = "9090"
+        self.CONNECT_TO = "172.16.6.3"
+        self.TIME = [(3,7)]
 
     def set_path(self, results_folder: str, containers_folder: str, configurations_folder: str, output_configuration_folder: str, scenario_folder: str):
         """
